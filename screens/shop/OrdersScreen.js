@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import HeaderButton from '../../components/UI/HeaderButton';
 
+import OrderItem from '../../components/shop/OrderItem';
+
 const OrdersScreen = (props) => {
   const orders = useSelector((state) => state.orders.orders);
 
@@ -14,7 +16,11 @@ const OrdersScreen = (props) => {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <View>
-          <Text key={item.totalAmount}>${item.totalAmount}</Text>
+          <OrderItem
+            amount={item.totalAmount}
+            date={item.readableDate}
+            items={item.items}
+          />
         </View>
       )}
     />
