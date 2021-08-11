@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   ScrollView,
@@ -11,13 +11,17 @@ import {
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import HeaderButton from '../../components/UI/HeaderButton';
 
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+
+import * as productsActions from '../../store/actions/products';
 
 const EditProductScreen = (props) => {
   const productId = props.navigation.getParam('productId');
   const editedProduct = useSelector((state) =>
     state.products.userProducts.find((p) => p.id === productId)
   );
+
+  const dispatch = useDispatch();
 
   const [title, setTitle] = useState(editedProduct ? editedProduct.title : '');
   const [imageUrl, setImageUrl] = useState(
@@ -27,6 +31,23 @@ const EditProductScreen = (props) => {
   const [description, setDescription] = useState(
     editedProduct ? editedProduct.description : ''
   );
+
+  const submitHandler = useCallback(() => {
+    if (productId) {
+      dispatch(
+        productsActions.updateProduct(productId, title, description, imageUrl)
+      );
+    } else {
+      dispatch(
+        productsActions.createProduct(title, description, imageUrl, +price)
+      );
+    }
+    props.navigation.goBack();
+  }, [dispatch, productId, title, imageUrl, price, description]);
+
+  useEffect(() => {
+    props.navigation.setParams({ submit: submitHandler });
+  }, [submitHandler]);
 
   return (
     <ScrollView>
@@ -71,6 +92,7 @@ const EditProductScreen = (props) => {
 };
 
 EditProductScreen.navigationOptions = (navData) => {
+  const submit = navData.navigation.getParam('submit');
   return {
     headerTitle: navData.navigation.getParam('productId')
       ? 'Edit Product'
@@ -82,7 +104,7 @@ EditProductScreen.navigationOptions = (navData) => {
           iconName={
             Platform.OS === 'android' ? 'md-checkmark' : 'ios-checkmark'
           }
-          onPress={() => {}}
+          onPress={submit}
         />
       </HeaderButtons>
     ),
