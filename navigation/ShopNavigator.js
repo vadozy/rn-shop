@@ -32,7 +32,6 @@ const ProductsNavigator = createStackNavigator(
     ProductsOverview: ProductsOverviewScreen,
     ProductDetail: ProductDetailScreen,
     Cart: CartScreen,
-    Orders: OrdersScreen,
   },
   {
     // navigationOptions used when this stackNav is inside drawerNav
@@ -95,7 +94,7 @@ const ShopNavigator = createDrawerNavigator(
       navigationOptions: { drawerLabel: 'Products' },
     },
     // Orders conflicts with Orders in StackNavigators, so use Orders2
-    Orders2: {
+    Orders: {
       screen: OrdersNavigator,
       navigationOptions: { drawerLabel: 'Orders' },
     },
@@ -110,17 +109,5 @@ const ShopNavigator = createDrawerNavigator(
     },
   }
 );
-
-// const ShopNavigator = createDrawerNavigator(
-//   {
-//     Products: ProductsNavigator,
-//     OrdersDrawer: OrdersNavigator,
-//   },
-//   {
-//     contentOptions: {
-//       activeTintColor: Colors.primary,
-//     },
-//   }
-// );
 
 export default createAppContainer(ShopNavigator);
