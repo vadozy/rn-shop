@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -25,20 +25,29 @@ const ProductsOverviewScreen = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const dispatch = useDispatch();
-  useEffect(() => {
-    const loadProducts = async () => {
-      setIsLoading(true);
-      try {
-        await dispatch(productActions.fetchProducts());
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    loadProducts();
-  }, []);
+  const loadProducts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await dispatch(productActions.fetchProducts());
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [dispatch, setIsLoading, setError]);
+
+  useEffect(() => {
+    const subscription = props.navigation.addListener(
+      'willFocus',
+      loadProducts
+    );
+    return () => subscription.remove();
+  }, [loadProducts]);
+
+  // useEffect(() => {
+  //   loadProducts();
+  // }, []);
 
   const renderFlatListItem = ({ item }) => {
     const { imageUrl, title, price } = item;
@@ -100,6 +109,8 @@ const ProductsOverviewScreen = (props) => {
 
   return (
     <FlatList
+      onRefresh={loadProducts}
+      refreshing={isLoading}
       data={products}
       keyExtractor={(item) => item.id}
       renderItem={renderFlatListItem}
