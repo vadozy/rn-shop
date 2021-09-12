@@ -107,9 +107,4 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontFamily: 'open-sans',
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
 });

@@ -9,10 +9,11 @@ const artificialDelay = () =>
   });
 
 export const fetchOrders = () => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const userId = getState()?.auth?.userId;
     console.log('LOADING ORDERS...');
     try {
-      const response = await fetch(`${FIREBASE_URI}/orders/u1.json`);
+      const response = await fetch(`${FIREBASE_URI}/orders/${userId}.json`);
 
       if (!response.ok) {
         throw new Error('Something went wrong. Is URL correct?');
@@ -42,24 +43,32 @@ export const fetchOrders = () => {
 };
 
 export const addOrder = (cartItems, totalAmount) => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
+    const token = getState()?.auth?.token;
+    const userId = getState()?.auth?.userId;
     const date = new Date();
 
     console.log('CREATING ORDER...');
-    const response = await fetch(`${FIREBASE_URI}/orders/u1.json`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        cartItems,
-        totalAmount,
-        date: date.toISOString(),
-      }),
-    });
+    const response = await fetch(
+      `${FIREBASE_URI}/orders/${userId}.json?auth=${token}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cartItems,
+          totalAmount,
+          date: date.toISOString(),
+        }),
+      }
+    );
 
     if (!response.ok) {
-      throw new Error('Something went wrong. Could not save order');
+      const data = await response.json();
+      // console.log('Error');
+      // console.log(data);
+      throw new Error(`Could not save order - ${data.error}`);
     }
 
     await artificialDelay();

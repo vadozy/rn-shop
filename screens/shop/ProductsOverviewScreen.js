@@ -45,9 +45,9 @@ const ProductsOverviewScreen = (props) => {
     return () => subscription.remove();
   }, [loadProducts]);
 
-  // useEffect(() => {
-  //   loadProducts();
-  // }, []);
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   const renderFlatListItem = ({ item }) => {
     const { imageUrl, title, price } = item;
