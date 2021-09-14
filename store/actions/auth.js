@@ -1,7 +1,17 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { FIREBASE_API_KEY } from '../../env';
 
-export const SIGNUP = 'SIGNUP';
-export const LOGIN = 'LOGIN';
+export const AUTHENTICATE = 'AUTHENTICATE';
+export const LOGOUT = 'LOGOUT';
+
+export const authenticate = (token, userId) => {
+  return { type: AUTHENTICATE, token, userId };
+};
+
+export const logout = () => {
+  return { type: LOGOUT };
+};
 
 export const signup = (email, password) => {
   return async (dispatch) => {
@@ -28,11 +38,13 @@ export const signup = (email, password) => {
 
     const responseData = await response.json();
     console.log(responseData);
-    dispatch({
-      type: SIGNUP,
-      token: responseData.idToken,
-      userId: responseData.localId,
-    });
+
+    const [token, userId] = [responseData.idToken, responseData.localId];
+    const exp = new Date().getTime() + parseInt(responseData.expiresIn) * 1000;
+    const expirationDate = new Date(exp);
+    await saveDataToStorage(token, userId, expirationDate);
+
+    dispatch(authenticate(token, userId));
   };
 };
 
@@ -61,10 +73,27 @@ export const login = (email, password) => {
 
     const responseData = await response.json();
     console.log(responseData);
-    dispatch({
-      type: LOGIN,
-      token: responseData.idToken,
-      userId: responseData.localId,
-    });
+
+    const [token, userId] = [responseData.idToken, responseData.localId];
+    const exp = new Date().getTime() + parseInt(responseData.expiresIn) * 1000;
+    const expirationDate = new Date(exp);
+    await saveDataToStorage(token, userId, expirationDate);
+
+    dispatch(authenticate(token, userId));
   };
 };
+
+async function saveDataToStorage(token, userId, expirationDate) {
+  try {
+    await AsyncStorage.setItem(
+      'userData',
+      JSON.stringify({
+        token,
+        userId,
+        expirationDate: expirationDate.toISOString(),
+      })
+    );
+  } catch (e) {
+    console.error('Could not store user data to AsyncStorage');
+  }
+}

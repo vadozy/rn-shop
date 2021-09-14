@@ -49,7 +49,7 @@ export const fetchProducts = () => {
       await artificialDelay();
 
       const userProducts = products.filter((p) => p.ownerId === userId);
-      console.log(userProducts);
+      // console.log(userProducts);
 
       dispatch({
         type: SET_PRODUCTS,
