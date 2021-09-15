@@ -34,7 +34,13 @@ const StartupScreen = (props) => {
         return;
       }
 
-      dispatch(authActions.authenticate(token, userId));
+      dispatch(
+        authActions.authenticate(
+          token,
+          userId,
+          expirationDate.getTime() - new Date().getTime()
+        )
+      );
 
       props.navigation.navigate('Shop');
     };

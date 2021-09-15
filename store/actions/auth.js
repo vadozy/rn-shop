@@ -5,12 +5,34 @@ import { FIREBASE_API_KEY } from '../../env';
 export const AUTHENTICATE = 'AUTHENTICATE';
 export const LOGOUT = 'LOGOUT';
 
-export const authenticate = (token, userId) => {
-  return { type: AUTHENTICATE, token, userId };
+let logoutTimer;
+
+export const authenticate = (token, userId, expiresMs) => {
+  return (dispatch) => {
+    dispatch(setLogoutTimer(expiresMs));
+    dispatch({ type: AUTHENTICATE, token, userId });
+  };
 };
 
 export const logout = () => {
+  clearLogoutTimer();
+  AsyncStorage.removeItem('userData');
   return { type: LOGOUT };
+};
+
+const setLogoutTimer = (expirationTime) => {
+  return (dispatch) => {
+    logoutTimer = setTimeout(() => {
+      dispatch(logout());
+    }, expirationTime);
+  };
+};
+
+const clearLogoutTimer = () => {
+  if (logoutTimer) {
+    clearTimeout(logoutTimer);
+    logoutTimer = null;
+  }
 };
 
 export const signup = (email, password) => {
@@ -44,7 +66,9 @@ export const signup = (email, password) => {
     const expirationDate = new Date(exp);
     await saveDataToStorage(token, userId, expirationDate);
 
-    dispatch(authenticate(token, userId));
+    dispatch(
+      authenticate(token, userId, parseInt(responseData.expiresIn - 5) * 1000)
+    );
   };
 };
 
@@ -79,7 +103,9 @@ export const login = (email, password) => {
     const expirationDate = new Date(exp);
     await saveDataToStorage(token, userId, expirationDate);
 
-    dispatch(authenticate(token, userId));
+    dispatch(
+      authenticate(token, userId, parseInt(responseData.expiresIn - 5) * 1000)
+    );
   };
 };
 
